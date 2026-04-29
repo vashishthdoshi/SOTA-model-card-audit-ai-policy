@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Cards & AI Legislation — CMU 80736</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0d1b2a; --navy-mid:#1a2e42; --navy-soft:#2c4a63; --navy-muted:#4a6a85; --navy-pale:#8aaec8;
+  --off:#f8f7f4; --white:#ffffff; --border:#d4d0c8; --border-s:#e8e5df;
+  --green:#1a5c35; --green-bg:#e8f2ed; --green-b:#b8d9c6; --green-dot:#2e7d4f;
+  --red:#7a1a1a; --red-bg:#f5e8e8; --red-b:#d4b0b0; --red-dot:#9e2a2a;
+  --txt:#1a2832; --txts:#3a4f5e; --txtm:#5e7a8a;
+  --ribbon:48px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--off);color:var(--txt);font-family:'Source Serif 4',Georgia,serif;font-size:13.5px;line-height:1.6;padding-bottom:var(--ribbon)}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:44px 56px 32px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px}
+.hdr-in{position:relative;z-index:1}
+.hdr-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--navy-pale);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.hdr-tag::before{content:'';display:block;width:24px;height:1px;background:var(--navy-pale)}
+.hdr-title{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:#fff;line-height:1.08;letter-spacing:-.4px;margin-bottom:8px}
+.hdr-title em{font-style:italic;color:var(--navy-pale)}
+.hdr-desc{font-family:'Source Serif 4',serif;font-size:14px;color:rgba(255,255,255,.5);font-weight:300;max-width:680px;line-height:1.65;margin-bottom:28px;font-style:italic}
+.hdr-stats{display:flex;gap:0;border:1px solid rgba(255,255,255,.1);border-radius:5px;overflow:hidden;width:fit-content}
+.stat{padding:11px 22px;border-right:1px solid rgba(255,255,255,.1);text-align:center}
+.stat:last-child{border-right:none}
+.stat-n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;display:block;line-height:1;margin-bottom:3px}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy-pale)}
+
+/* ── TOOLBAR ── */
+.toolbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 56px;display:flex;align-items:stretch;height:52px;box-shadow:0 1px 8px rgba(13,27,42,.08);gap:0;position:sticky;top:0;z-index:90;flex-wrap:nowrap;overflow-x:auto}
+.tb-sep{width:1px;background:var(--border-s);margin:10px 0;flex-shrink:0}
+.tb-section{display:flex;align-items:center;gap:5px;padding:0 16px 0 0;flex-shrink:0}
+.tb-section:first-child{padding-left:0}
+.tb-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txtm);white-space:nowrap;margin-right:3px}
+.view-tab{display:flex;align-items:center;gap:6px;padding:0 16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;color:var(--txtm);transition:all .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;height:52px}
+.view-tab:hover{color:var(--navy)}
+.view-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.chip{padding:4px 10px;border-radius:3px;border:1px solid var(--border);background:var(--off);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.04em;cursor:pointer;color:var(--txts);transition:all .14s;white-space:nowrap;height:28px;line-height:1}
+.chip:hover,.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tb-search-wrap{position:relative;display:flex;align-items:center}
+.tb-search-icon{position:absolute;left:8px;color:var(--navy-muted);font-size:13px;pointer-events:none;font-family:'JetBrains Mono',monospace}
+.tb-search{padding:6px 10px 6px 26px;border:1px solid var(--border);border-radius:3px;background:var(--off);font-family:'Source Serif 4',serif;font-size:12.5px;color:var(--navy);width:200px;outline:none;transition:border-color .15s,width .2s;height:28px}
+.tb-search:focus{border-color:var(--navy-soft);width:240px}
+.act-btn{padding:5px 11px;border-radius:3px;border:1px solid var(--border);background:transparent;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.05em;cursor:pointer;color:var(--txts);transition:all .14s;display:flex;align-items:center;gap:5px;height:28px;white-space:nowrap}
+.act-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.bm-count{background:var(--navy);color:#fff;border-radius:10px;padding:1px 5px;font-size:8px;margin-left:2px}
+.tb-right{display:flex;align-items:center;gap:6px;margin-left:auto;padding-left:16px;flex-shrink:0}
+.row-ct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txtm);white-space:nowrap;padding:0 0 0 12px}
+
+/* ── COLUMN PANEL ── */
+.col-panel{display:none;position:fixed;top:52px;right:56px;background:var(--white);border:1px solid var(--border);border-radius:5px;box-shadow:0 8px 24px rgba(13,27,42,.14);padding:18px;z-index:200;min-width:230px}
+.col-panel.open{display:block}
+.col-panel h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txtm);margin-bottom:12px}
+.cp-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-s)}
+.cp-row:last-child{border-bottom:none}
+.cp-lbl{font-family:'Source Serif 4',serif;font-size:12px;color:var(--txt);cursor:pointer;flex:1}
+.cp-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txtm);margin-right:8px}
+.sw{width:28px;height:14px;background:var(--border);border-radius:7px;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
+.sw.on{background:var(--navy)}
+.sw::after{content:'';position:absolute;width:10px;height:10px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .15s}
+.sw.on::after{left:16px}
+
+/* ── KEYBOARD HINT ── */
+.kb-hint{position:fixed;bottom:calc(var(--ribbon) + 8px);right:16px;background:rgba(13,27,42,.9);color:rgba(255,255,255,.8);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;padding:8px 14px;border-radius:4px;display:none;z-index:150;line-height:1.8}
+.kb-hint.show{display:block}
+
+/* ── TABLE VIEW ── */
+.tbl-view{padding:24px 56px 32px;display:block}
+.tbl-view.hidden,.map-view.hidden{display:none}
+.scroll-hint{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txtm);letter-spacing:.08em;padding:6px;margin-bottom:4px}
+table{border-collapse:collapse;width:100%;min-width:2500px;background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+table[data-hide~="c2"] [data-col="c2"]{display:none}
+table[data-hide~="c3"] [data-col="c3"]{display:none}
+table[data-hide~="c4"] [data-col="c4"]{display:none}
+table[data-hide~="c5"] [data-col="c5"]{display:none}
+table[data-hide~="c6"] [data-col="c6"]{display:none}
+table[data-hide~="c7"] [data-col="c7"]{display:none}
+table[data-hide~="c8"] [data-col="c8"]{display:none}
+table[data-hide~="c9"] [data-col="c9"]{display:none}
+table[data-hide~="c10"] [data-col="c10"]{display:none}
+table[data-hide~="c11"] [data-col="c11"]{display:none}
+thead tr{background:var(--navy-mid)}
+th{padding:10px 13px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-pale);font-weight:400;border-right:1px solid rgba(255,255,255,.06);white-space:nowrap;cursor:pointer;transition:color .12s;vertical-align:bottom;user-select:none}
+th:hover{color:#fff}
+th:last-child{border-right:none}
+th .th-num{display:block;font-size:7px;color:rgba(255,255,255,.2);margin-bottom:3px;letter-spacing:.06em}
+th .sort-ind{margin-left:4px;opacity:.3;font-size:9px;font-style:normal}
+th.sort-asc .sort-ind,th.sort-desc .sort-ind{opacity:1;color:#f0d060}
+th.sort-asc .sort-ind::after{content:'↑'}
+th.sort-desc .sort-ind::after{content:'↓'}
+th:not(.sort-asc):not(.sort-desc) .sort-ind::after{content:'↕'}
+th.sort2-asc .sort-ind::after{content:'↑²';color:#f0d060;opacity:.6}
+th.sort2-desc .sort-ind::after{content:'↓²';color:#f0d060;opacity:.6}
+
+/* BM col */
+.th-bm,.td-bm{width:34px;min-width:34px;padding:10px 6px !important;text-align:center !important;cursor:default !important;border-right:1px solid rgba(255,255,255,.06)}
+.td-bm{border-right:1px solid var(--border-s)}
+.bm-star{font-size:14px;cursor:pointer;color:var(--border);transition:color .12s;line-height:1;display:block}
+.bm-star:hover{color:var(--navy-muted)}
+.bm-star.on{color:var(--navy)}
+
+tbody tr{border-bottom:1px solid var(--border-s);transition:background .1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f2f0eb}
+tbody tr.expanded{background:#edeae3}
+tbody tr.focused{outline:2px solid var(--navy-soft);outline-offset:-2px}
+tbody tr.hidden-row{display:none}
+tbody tr.bookmarked{border-left:3px solid var(--navy)}
+
+td{padding:12px 13px;vertical-align:top;border-right:1px solid var(--border-s);color:var(--txts);font-size:12.5px;line-height:1.55}
+td:last-child{border-right:none}
+
+/* column widths */
+.tc1{width:105px;min-width:95px}
+.tc2{width:195px;min-width:175px}
+.tc3{width:115px;min-width:105px}
+.tc4{width:88px;min-width:80px}
+.tc5,.tc6,.tc7{width:235px;min-width:200px}
+.tc8,.tc9{width:138px;min-width:120px}
+.tc10,.tc11{width:86px;min-width:76px}
+
+/* badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:2px;background:var(--navy);color:#fff;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.badge-sub{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy-muted);margin-top:3px;letter-spacing:.03em}
+
+/* status */
+.status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;white-space:nowrap}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.s-g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.s-g::before{background:var(--green-dot)}
+.s-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.s-r::before{background:var(--red-dot)}
+
+/* law name */
+.law-name{font-family:'Source Serif 4',serif;font-weight:500;color:var(--navy);font-size:13px;line-height:1.3;margin-bottom:2px}
+.law-id{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy-muted);line-height:1.4}
+
+/* bullet lists */
+.bl{list-style:none;padding:0;margin:0}
+.bl li{padding:1px 0 1px 13px;position:relative;font-size:12px;line-height:1.5;color:var(--txts)}
+.bl li::before{content:'—';position:absolute;left:0;color:var(--navy-pale);font-family:'JetBrains Mono',monospace;font-size:9.5px;top:2px}
+
+/* truncation */
+.trunc{max-height:88px;overflow:hidden;transition:max-height .25s}
+tr.expanded .trunc{max-height:500px}
+.more-hint{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy-pale);margin-top:2px}
+tr.expanded .more-hint{display:none}
+
+/* timeline chips */
+.tl{display:block;padding:2px 7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;border:1px solid var(--border);border-radius:2px;color:var(--txts);background:var(--off);margin:2px 0;width:fit-content}
+.tl.a{border-color:var(--green-b);background:var(--green-bg);color:var(--green)}
+.tl.w{border-color:var(--red-b);background:var(--red-bg);color:var(--red)}
+
+/* source links */
+.src{display:block;padding:3px 8px;background:var(--navy);color:#fff !important;text-decoration:none;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;margin-bottom:3px;width:fit-content;transition:background .12s,transform .08s}
+.src:hover{background:var(--navy-soft);transform:translateX(2px)}
+.src.empty{background:var(--border);color:var(--txtm) !important;pointer-events:none;opacity:.65}
+
+/* ── MAP VIEW ── */
+.map-view{padding:28px 56px 24px;display:block}
+.map-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:24px}
+.map-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.map-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--txtm);text-transform:uppercase}
+.legend{display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.leg-row{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txts)}
+.lt{width:22px;height:22px;border-radius:3px;flex-shrink:0}
+.lt-none{background:#dde3ea;border:1.5px solid #b8c4cf}
+.lt-state{background:var(--navy);border:1.5px solid #000;transform:translateY(-3px);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.lt-fed{background:#2c4a63;border:1.5px solid #1a2e42;transform:translateY(-2px);box-shadow:0 3px 0 rgba(0,0,0,.3)}
+
+.carto-wrap{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:32px 40px;overflow-x:auto}
+.carto-grid{display:grid;grid-template-columns:repeat(12,54px);grid-template-rows:repeat(8,54px);gap:5px;width:fit-content;margin:0 auto}
+.sq{width:54px;height:54px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.04em;position:relative;user-select:none;transition:transform .12s,box-shadow .12s}
+.sq-none{background:#dde3ea;border:1.5px solid #b8c4cf;color:#7a8fa0;cursor:default}
+.sq-state{background:var(--navy);border:1.5px solid #000;color:#fff;transform:translateY(-4px);box-shadow:0 5px 0 #000,0 6px 10px rgba(0,0,0,.2);cursor:pointer;z-index:2}
+.sq-state:hover{background:var(--navy-soft);transform:translateY(-6px);box-shadow:0 7px 0 #000,0 8px 14px rgba(0,0,0,.25)}
+.sq-fed{background:#2c4a63;border:1.5px solid #1a2e42;color:#aaccde;transform:translateY(-2px);box-shadow:0 3px 0 #0d1b2a;cursor:pointer;z-index:1}
+.sq-fed:hover{transform:translateY(-4px);box-shadow:0 5px 0 #0d1b2a}
+.sq-cnt{position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);color:var(--navy);font-size:7.5px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* ── POPUP ── */
+.pop-overlay{position:fixed;inset:0;background:rgba(13,27,42,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:40px;backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .18s}
+.pop-overlay.open{opacity:1;pointer-events:all}
+.pop-box{background:var(--white);border:1px solid var(--border);border-radius:6px;box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:920px;max-height:82vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(14px);transition:transform .18s}
+.pop-overlay.open .pop-box{transform:translateY(0)}
+.pop-head{background:var(--navy);padding:18px 24px 16px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
+.pop-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy-pale);margin-bottom:5px}
+.pop-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;line-height:1}
+.pop-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;letter-spacing:.05em}
+.pop-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:background .12s}
+.pop-close:hover{background:rgba(255,255,255,.22)}
+.pop-body{overflow-y:auto;flex:1}
+.pop-tbl{width:100%;border-collapse:collapse;min-width:700px}
+.pop-tbl thead tr{background:var(--navy-mid);position:sticky;top:0;z-index:10}
+.pop-tbl th{padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-pale);font-weight:400;border-right:1px solid rgba(255,255,255,.06);text-align:left;white-space:nowrap}
+.pop-tbl th:last-child{border-right:none}
+.pop-tbl td{padding:12px 13px;vertical-align:top;border-right:1px solid var(--border-s);font-size:12px;color:var(--txts);line-height:1.5;border-bottom:1px solid var(--border-s)}
+.pop-tbl td:last-child{border-right:none}
+.pop-tbl tr:last-child td{border-bottom:none}
+.pop-tbl tr:hover td{background:#f5f3ee}
+.pop-law{font-family:'Source Serif 4',serif;font-weight:500;color:var(--navy);font-size:12.5px;margin-bottom:2px}
+.pop-id{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--navy-muted)}
+
+/* ── RIBBON ── */
+.ribbon{position:fixed;bottom:0;left:0;right:0;height:var(--ribbon);background:var(--navy);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;padding:0 56px;z-index:200}
+.rib-l{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--navy-pale);letter-spacing:.08em;display:flex;align-items:center;gap:14px}
+.rib-dot{width:3px;height:3px;border-radius:50%;background:var(--navy-pale);opacity:.5}
+.rib-authors{font-family:'Source Serif 4',serif;font-size:11px;font-style:italic;color:rgba(255,255,255,.55)}
+.rib-r{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.28);letter-spacing:.06em}
+
+/* ── PRINT ── */
+@media print{
+  .toolbar,.col-panel,.ribbon,.kb-hint,.pop-overlay,.scroll-hint{display:none !important}
+  body{padding-bottom:0;font-size:11px}
+  .tbl-view{padding:12px}
+  table{min-width:auto}
+  tbody tr{page-break-inside:avoid}
+  tr.expanded .trunc,tr .trunc{max-height:none;overflow:visible}
+  .more-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-in">
+    <div class="hdr-tag">Policy Intelligence · Global AI Governance</div>
+    <div class="hdr-title">Model Cards &amp; <em>AI Legislation</em></div>
+    <div class="hdr-desc">Every legislative instrument, executive policy, and regulatory framework that explicitly or substantively engages with model card transparency, accountability, and auditability — as of April 2026.</div>
+    <div class="hdr-stats">
+      <div class="stat"><span class="stat-n" id="statTotal">26</span><span class="stat-l">Instruments</span></div>
+      <div class="stat"><span class="stat-n">11</span><span class="stat-l">Jurisdictions</span></div>
+      <div class="stat"><span class="stat-n">16</span><span class="stat-l">In Force</span></div>
+      <div class="stat"><span class="stat-n">6</span><span class="stat-l">Not Passed</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <!-- View tabs -->
+  <button class="view-tab active" id="tabTable" onclick="setView('table')">⊞&nbsp; Table</button>
+  <button class="view-tab" id="tabMap" onclick="setView('map')">◫&nbsp; US Map</button>
+  <div class="tb-sep"></div>
+
+  <!-- Region filter -->
+  <div class="tb-section">
+    <span class="tb-lbl">Region</span>
+    <button class="chip on" data-region="all" onclick="setRegion(this)">All</button>
+    <button class="chip" data-region="federal" onclick="setRegion(this)">Federal</button>
+    <button class="chip" data-region="state" onclick="setRegion(this)">State</button>
+    <button class="chip" data-region="local" onclick="setRegion(this)">Local</button>
+    <button class="chip" data-region="international" onclick="setRegion(this)">International</button>
+    <button class="chip" data-region="voluntary" onclick="setRegion(this)">Voluntary</button>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Status filter -->
+  <div class="tb-section">
+    <span class="tb-lbl">Status</span>
+    <button class="chip on" data-status="all" onclick="setStatus(this)">All</button>
+    <button class="chip" data-status="force" onclick="setStatus(this)">In Force</button>
+    <button class="chip" data-status="red" onclick="setStatus(this)">Not In Force</button>
+  </div>
+  <div class="tb-sep"></div>
+
+  <!-- Search -->
+  <div class="tb-section">
+    <div class="tb-search-wrap">
+      <span class="tb-search-icon">⌕</span>
+      <input class="tb-search" id="searchInput" type="text" placeholder="Search laws, keywords…" oninput="doSearch()" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- Right actions -->
+  <div class="tb-right">
+    <button class="act-btn" onclick="toggleColPanel(event)">⊞ Columns</button>
+    <button class="act-btn" onclick="exportCSV()">⬇ CSV</button>
+    <button class="act-btn" onclick="window.print()">⎙ Print</button>
+    <button class="act-btn" id="bmBtn" onclick="toggleBmFilter()">☆ Bookmarks<span class="bm-count" id="bmCount" style="display:none">0</span></button>
+    <button class="act-btn" onclick="toggleKbHint()">⌨ Keys</button>
+    <span class="row-ct" id="rowCount">26 rows</span>
+  </div>
+</div>
+
+<!-- COLUMN PANEL -->
+<div class="col-panel" id="colPanel">
+  <h4>Toggle Columns</h4>
+  <div class="cp-row"><span class="cp-num">#1</span><span class="cp-lbl">Region / Jurisdiction</span><div class="sw on" data-col="c1" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#2</span><span class="cp-lbl">Law / Bill Name</span><div class="sw on" data-col="c2" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#3</span><span class="cp-lbl">Status</span><div class="sw on" data-col="c3" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#4</span><span class="cp-lbl">Primary Source</span><div class="sw on" data-col="c4" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#5</span><span class="cp-lbl">Relevance</span><div class="sw on" data-col="c5" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#6</span><span class="cp-lbl">Specific References</span><div class="sw on" data-col="c6" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#7</span><span class="cp-lbl">Implications</span><div class="sw on" data-col="c7" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#8</span><span class="cp-lbl">Timeline: Passage</span><div class="sw on" data-col="c8" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#9</span><span class="cp-lbl">Timeline: Activation</span><div class="sw on" data-col="c9" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#10</span><span class="cp-lbl">Source 2</span><div class="sw on" data-col="c10" onclick="toggleCol(this)"></div></div>
+  <div class="cp-row"><span class="cp-num">#11</span><span class="cp-lbl">Source 3</span><div class="sw on" data-col="c11" onclick="toggleCol(this)"></div></div>
+</div>
+
+<!-- KEYBOARD HINT -->
+<div class="kb-hint" id="kbHint">
+  ↑ / ↓ &nbsp; Navigate rows &nbsp;·&nbsp; Enter &nbsp; Expand/collapse &nbsp;·&nbsp; Esc &nbsp; Close popup / collapse &nbsp;·&nbsp; Shift+↑↓ &nbsp; Secondary sort
+</div>
+
+<!-- TABLE VIEW -->
+<div class="tbl-view" id="tableView">
+  <div class="scroll-hint">← Scroll horizontally to view all 11 columns — click any row to expand →</div>
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th class="th-bm" title="Bookmarks"></th>
+        <th data-col="c1" class="tc1" onclick="doSort('region',event)"><span class="th-num">#1</span>Region<i class="sort-ind"></i></th>
+        <th data-col="c2" class="tc2" onclick="doSort('name',event)"><span class="th-num">#2</span>Law / Bill Name<i class="sort-ind"></i></th>
+        <th data-col="c3" class="tc3" onclick="doSort('status',event)"><span class="th-num">#3</span>Status<i class="sort-ind"></i></th>
+        <th data-col="c4" class="tc4"><span class="th-num">#4</span>Source 1</th>
+        <th data-col="c5" class="tc5"><span class="th-num">#5</span>Relevance</th>
+        <th data-col="c6" class="tc6"><span class="th-num">#6</span>Specific References</th>
+        <th data-col="c7" class="tc7"><span class="th-num">#7</span>Implications</th>
+        <th data-col="c8" class="tc8" onclick="doSort('passage',event)"><span class="th-num">#8</span>Timeline: Passage<i class="sort-ind"></i></th>
+        <th data-col="c9" class="tc9" onclick="doSort('activation',event)"><span class="th-num">#9</span>Timeline: Activation<i class="sort-ind"></i></th>
+        <th data-col="c10" class="tc10"><span class="th-num">#10</span>Source 2</th>
+        <th data-col="c11" class="tc11"><span class="th-num">#11</span>Source 3</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<!-- MAP VIEW -->
+<div class="map-view hidden" id="mapView">
+  <div class="map-head">
+    <div>
+      <div class="map-title">US State &amp; Local AI Legislation</div>
+      <div class="map-sub">Square tile cartogram · raised states have tracked legislation · click to view</div>
+    </div>
+    <div class="legend">
+      <div class="leg-row"><div class="lt lt-state"></div>State / Local legislation — raised &amp; clickable</div>
+      <div class="leg-row"><div class="lt lt-fed"></div>Federal legislation hub (DC)</div>
+      <div class="leg-row"><div class="lt lt-none"></div>No tracked legislation</div>
+    </div>
+  </div>
+  <div class="carto-wrap">
+    <div class="carto-grid" id="cartoGrid"></div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div class="pop-overlay" id="popOverlay" onclick="handleOverlayClick(event)">
+  <div class="pop-box" id="popBox">
+    <div class="pop-head">
+      <div>
+        <div class="pop-tag" id="popTag">State Legislation · United States</div>
+        <div class="pop-name" id="popName">California</div>
+        <div class="pop-sub" id="popSub">3 instruments</div>
+      </div>
+      <button class="pop-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="pop-body" id="popBody"></div>
+  </div>
+</div>
+
+<!-- RIBBON -->
+<div class="ribbon">
+  <div class="rib-l">
+    <span>Updated April 28th, 2026</span>
+    <span class="rib-dot"></span>
+    <span>80736 · S26 · Carnegie Mellon University</span>
+    <span class="rib-dot"></span>
+    <span class="rib-authors">Saumya Goyal &nbsp;·&nbsp; Ziqian Zhong &nbsp;·&nbsp; Vashishth Doshi</span>
+  </div>
+  <div class="rib-r">Model Cards &amp; AI Legislation · Policy Intelligence</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const DATA = [
+  {id:1,region:'federal',regionLabel:'Federal',jurisdiction:'USA',name:'OMB Memorandum M-26-04',billId:'Increasing Public Trust in AI Through Unbiased AI Principles',status:'force',statusLabel:'In Force',
+   src1url:'https://www.whitehouse.gov/wp-content/uploads/2025/12/M-26-04-Increasing-Public-Trust-in-Artificial-Intelligence-Through-Unbiased-AI-Principles-1.pdf',src1label:'whitehouse.gov',
+   relevance:['First US federal instrument to explicitly name "Model, System, or Data Cards" as mandatory procurement deliverables','Directly operationalises model card transparency for all federal LLM contracts','Creates enforceable vendor accountability backed by contract termination authority','Sets de facto industry standard for government-facing AI documentation'],
+   specific:['Minimum tier: Model/System/Data Cards + Acceptable Use Policy + feedback mechanism for Unbiased AI Principle violations','Enhanced tier: bias evaluation results, benchmark scores for helpfulness/honesty/accuracy, pre/post-training disclosures, third-party modification records','Appendix A Sec. B mandates ongoing behavioural evaluation — not static documentation alone'],
+   implications:['All federal LLM vendors must provide model cards or risk contract termination','Model card is designated as a material contract requirement across all executive departments','Policy update deadline: March 11, 2026; memorandum sunsets December 2027'],
+   passageTimeline:[{l:'Issued Dec 11, 2025',t:'a'},{l:'Implements EO 14319 (Jul 2025)',t:''}],
+   activationTimeline:[{l:'Immediate for new contracts',t:'a'},{l:'Policy update deadline: Mar 11, 2026',t:'w'},{l:'Sunsets: Dec 2027',t:'w'}],
+   src2url:'https://www.lawfaremedia.org/article/omb-releases-guidance-on-trump-s--woke-ai--executive-order',src2label:'Lawfare',
+   src3url:'https://www.fiddler.ai/blog/omb-m-26-04',src3label:'Fiddler AI',states:['DC']},
+
+  {id:2,region:'federal',regionLabel:'Federal',jurisdiction:'USA',name:'OMB Memorandum M-25-21',billId:'Accelerating Federal Use of AI through Innovation, Governance and Public Trust',status:'force',statusLabel:'In Force',
+   src1url:'https://www.whitehouse.gov/wp-content/uploads/2025/02/M-25-21-Accelerating-Federal-Use-of-AI-through-Innovation-Governance-and-Public-Trust.pdf',src1label:'whitehouse.gov',
+   relevance:['Predecessor to M-26-04; established governance and documentation baseline for federal AI adoption','Required agencies to maintain AI use-case inventories — functionally a model card registry mandate','Introduced "rights-impacting" and "safety-impacting" AI classifications requiring enhanced documentation and human oversight','Foundational memo into which M-26-04\'s explicit model card requirements slot'],
+   specific:['Requires agencies to document AI use cases and maintain inventories of high-impact AI systems','Mandates pre-deployment testing and risk assessments for AI systems — documentation analogous to model card content','References the NIST AI RMF as the standard framework for AI risk documentation'],
+   implications:['Establishes the institutional framework agencies use to track and document AI deployments','Part of the layered federal AI compliance stack alongside M-25-22 and M-26-04','Remains in force and operationally active despite administration change'],
+   passageTimeline:[{l:'Issued Apr 3, 2025',t:'a'}],
+   activationTimeline:[{l:'In force from issuance',t:'a'}],
+   src2url:'https://www.promptfoo.dev/blog/ai-regulation-2025/',src2label:'Promptfoo',
+   src3url:null,src3label:null,states:['DC']},
+
+  {id:3,region:'international',regionLabel:'International',jurisdiction:'European Union',name:'EU AI Act — GPAI Obligations',billId:'Regulation (EU) 2024/1689 · Articles 53 & 55',status:'force',statusLabel:'In Force',
+   src1url:'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689',src1label:'EUR-Lex',
+   relevance:['World\'s most comprehensive binding AI transparency framework — global benchmark for model documentation','Art. 53 mandates technical documentation for all GPAI models functionally equivalent to a model card','GPAI Code of Practice explicitly adopts the standard model card template as the compliance format','The "Brussels Effect" makes this standard effectively global for any company with EU market access'],
+   specific:['Art. 53(1)(a): Technical documentation sufficient for downstream deployers to understand capabilities and limitations','Art. 53(1)(b): Training data summary covering sources, type, and governance procedures','Art. 55 (systemic risk models): State-of-the-art model evaluations, red-teaming, incident reporting, cybersecurity documentation'],
+   implications:['Fines up to €30M or 6% of global annual turnover for non-compliance','Downstream providers entitled to receive documentation from upstream providers — supply-chain transparency obligation','All GPAI providers accessing the EU market must produce model cards meeting EU standards'],
+   passageTimeline:[{l:'Published Jul 12, 2024',t:'a'},{l:'In force Aug 1, 2024',t:'a'}],
+   activationTimeline:[{l:'GPAI obligations: Aug 2, 2025',t:'a'},{l:'High-risk systems: Aug 2, 2026',t:'w'},{l:'Pre-2025 models: Aug 2, 2027',t:'w'}],
+   src2url:'https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai',src2label:'EU Digital Strategy',
+   src3url:'https://artificialintelligenceact.eu/ai-act-explorer/',src3label:'AI Act Explorer',states:[]},
+
+  {id:4,region:'international',regionLabel:'International',jurisdiction:'European Union',name:'GPAI Code of Practice',billId:'EU AI Act Voluntary Compliance Instrument (Art. 56) · Jul 2025',status:'force',statusLabel:'In Force',
+   src1url:'https://digital-strategy.ec.europa.eu/en/policies/contents-code-gpai',src1label:'EU Digital Strategy',
+   relevance:['Most operationally specific model card framework in any regulatory instrument worldwide','Directly adopts the standard model card template as the compliance format for EU AI Act Art. 53','Signing creates a legal presumption of AI Act compliance — the strongest voluntary instrument available','Adopted by Anthropic, Google DeepMind, OpenAI, Meta, Microsoft, and others'],
+   specific:['Transparency Chapter: model cards covering intended use, capabilities, limitations, training data summaries, fine-tuning disclosures, supply-chain provenance','Safety & Security Chapter (systemic risk models): publication of safety evaluation summaries and red-teaming outcomes','Requires disclosure of base model for downstream providers — supply-chain traceability requirement'],
+   implications:['Voluntary but practically mandatory for EU market access for any GPAI provider','Standardises model card format across the industry — effectively creates a global template','Signatory Taskforce chaired by EU AI Office monitors adherence and coherent application'],
+   passageTimeline:[{l:'Published Jul 10, 2025',t:'a'},{l:'Endorsed by Commission: Aug 1, 2025',t:'a'}],
+   activationTimeline:[{l:'Effective immediately upon signing',t:'a'}],
+   src2url:'https://www.lw.com/en/insights/eu-ai-act-gpai-model-obligations-in-force-and-final-gpai-code-of-practice-in-place',src2label:'Latham & Watkins',
+   src3url:'https://www.holisticai.com/blog/the-eu-ai-acts-gpai-rules-effect-august-2',src3label:'Holistic AI',states:[]},
+
+  {id:5,region:'federal',regionLabel:'Federal',jurisdiction:'USA · 118th Congress',name:'AI Foundation Model Transparency Act',billId:'H.R. 8094 / H.R. 6881 · 2023–2024',status:'red',statusLabel:'Not Passed',
+   src1url:'https://www.congress.gov/bill/118th-congress/house-bill/8094',src1label:'congress.gov',
+   relevance:['Most directly targeted federal bill for foundation model documentation — a statutory model card mandate','Would have created FTC-enforced transparency standards for the largest US AI models','Demonstrated bipartisan congressional appetite for mandatory foundation model documentation','Led by Rep. Don Beyer (D-VA), Rep. Mike Lawler (R-NY), Rep. Sara Jacobs (D-CA)'],
+   specific:['Detailed summaries of training data sources and data governance procedures','Descriptions of model purposes and unintended consequences','Computational power used to train the foundation model','Precautions for high-risk queries: national security, elections, healthcare, hiring, CBRN weapons'],
+   implications:['Did not pass but established legislative template for all subsequent federal transparency bills','Influenced OMB M-26-04\'s enhanced transparency tier design','Expected reintroduction in modified form in the 119th Congress','Industry preferred a federal standard over a state-by-state patchwork — signals continued momentum'],
+   passageTimeline:[{l:'H.R. 6881 introduced Dec 2023',t:''},{l:'H.R. 8094 unveiled Mar 26, 2024',t:''},{l:'Not enacted — 118th Congress ended Jan 2025',t:'w'}],
+   activationTimeline:[{l:'Never activated',t:'w'}],
+   src2url:'https://www.congress.gov/bill/118th-congress/house-bill/6881',src2label:'H.R. 6881',
+   src3url:'https://fedscoop.com/ftc-enforcement-ai-foundation-models-bill/',src3label:'FedScoop',states:['DC']},
+
+  {id:6,region:'federal',regionLabel:'Federal',jurisdiction:'USA · 118th Congress',name:'AI Research, Innovation & Accountability Act',billId:'S.3312 · 2024',status:'red',statusLabel:'Not Passed',
+   src1url:'https://www.congress.gov/bill/118th-congress/senate-bill/3312/text',src1label:'congress.gov',
+   relevance:['Introduced mandatory "transparency reports" for high-impact AI — a statutory model card regime','Required critical-impact AI organisations to conduct documented TEVV (Test, Evaluation, Validation, Verification) processes','Covered trustworthy AI characteristics: validity, reliability, safety, fairness, transparency, privacy, and accountability','Closest Senate bill to a comprehensive statutory model card mandate'],
+   specific:['Required documentation of how organisations integrate trustworthy AI characteristics into policies and practices','Transparency reports must address bias and fairness, safety, explainability, privacy, and accountability','Deconfliction process required to avoid duplicating existing sectoral documentation requirements'],
+   implications:['Did not pass but established template language adopted in subsequent executive guidance','Demonstrated bipartisan support for documentation requirements in the Senate','Likely to inform next-Congress legislation on AI transparency'],
+   passageTimeline:[{l:'Introduced Nov 2023',t:''},{l:'Not enacted — 118th Congress ended',t:'w'}],
+   activationTimeline:[{l:'Never activated',t:'w'}],
+   src2url:'https://www.brennancenter.org/our-work/research-reports/artificial-intelligence-legislation-tracker',src2label:'Brennan Center',
+   src3url:null,src3label:null,states:['DC']},
+
+  {id:7,region:'federal',regionLabel:'Federal',jurisdiction:'USA · 118th Congress',name:'Federal AI Governance & Transparency Act',billId:'H.R. 7532 · 2024',status:'red',statusLabel:'Not Passed',
+   src1url:'https://www.congress.gov/bill/118th-congress/house-bill/7532/text',src1label:'congress.gov',
+   relevance:['Would have created federal AI governance charter requirements and an AI use-case registry — a government-wide model card registry','Required OMB to issue uniform guidance templates for AI governance documentation','Bipartisan bill (Comer, Raskin, Mace, Ocasio-Cortez, Connolly) — unusually broad coalition','Directed OMB to define "high-risk Federal AI systems" with corresponding documentation standards'],
+   specific:['Required agencies to establish AI governance charters and maintain AI use-case inventories','Mandated uniform submission formats and update criteria for AI system documentation','Required modification of agency appeals processes for AI-influenced decisions — implying per-system documentation'],
+   implications:['Did not pass but key provisions were absorbed into OMB M-25-21 and M-25-22','Established bipartisan consensus around AI governance documentation requirements','The use-case inventory concept now persists in current federal AI governance policy'],
+   passageTimeline:[{l:'Introduced Mar 5, 2024',t:''},{l:'Not enacted — 118th Congress ended',t:'w'}],
+   activationTimeline:[{l:'Never activated',t:'w'}],
+   src2url:'https://www.americanactionforum.org/list-of-proposed-ai-bills-table/',src2label:'AAF Tracker',
+   src3url:null,src3label:null,states:['DC']},
+
+  {id:8,region:'federal',regionLabel:'Federal',jurisdiction:'USA · 118th Congress',name:'AI Accountability Act',billId:'H.R. 3369 · 2023',status:'red',statusLabel:'Not Passed',
+   src1url:'https://www.congress.gov/bill/118th-congress/house-bill/3369',src1label:'congress.gov',
+   relevance:['Required NTIA to study and report on accountability mechanisms for AI systems, including audits, certifications, and assessments','The resulting NTIA AI Accountability Policy Report became foundational to subsequent executive AI policy','Established the federal government\'s analytical framework for AI accountability mechanisms','Framed trustworthiness as the goal of AI documentation — language persisting in current federal policy'],
+   specific:['Required NTIA study to examine how accountability measures are currently incorporated into AI systems','Study must address model documentation as a core accountability mechanism — explicit reference to model cards in NTIA report','Required examination of interoperability with international accountability frameworks'],
+   implications:['Bill itself was narrow but the NTIA report it generated shaped Biden-era AI governance framework','Established precedent for model cards as an accountability tool in federal policy discourse','NTIA report remains a reference document for federal AI documentation policy'],
+   passageTimeline:[{l:'Introduced May 2023',t:''},{l:'Not enacted — 118th Congress ended',t:'w'}],
+   activationTimeline:[{l:'Never activated as law',t:'w'},{l:'NTIA AI Accountability Report published 2024',t:'a'}],
+   src2url:'https://www.ntia.gov/issues/artificial-intelligence/ai-accountability-policy-report',src2label:'NTIA Report',
+   src3url:null,src3label:null,states:['DC']},
+
+  {id:9,region:'federal',regionLabel:'Federal',jurisdiction:'USA · FY2026 NDAA',name:'National Defense Authorization Act FY2026',billId:'P.L. 119-60 · Sections 1533, 6602, 6603',status:'force',statusLabel:'In Force',
+   src1url:'https://www.congress.gov/crs-product/IF13197',src1label:'CRS Summary',
+   relevance:['Creates DOD-wide AI model assessment framework including performance documentation standards — a mandatory model card regime for defence AI','Section 6602 requires IC heads to evaluate AI for fairness, transparency, accountability, and trustworthiness — covering all model card dimensions','Most significant defence-sector AI documentation mandate ever enacted'],
+   specific:['Sec. 1533: DOD cross-functional team to develop AI assessment framework with standards for AI model performance documentation','Sec. 6602: IC agencies must track and evaluate AI for efficacy, safety, fairness, transparency, accountability, lawfulness, and trustworthiness','Sec. 6603: Standards and benchmarks for publicly available AI models used by the intelligence community'],
+   implications:['Mandatory AI documentation standards across the entire US defence and intelligence apparatus','Sets procurement precedent flowing to defence contractors via FAR/DFARS updates','Cross-functional team under Sec. 1533 will define what "adequate" AI documentation means for defence procurement'],
+   passageTimeline:[{l:'Passed Congress Dec 18, 2025',t:'a'},{l:'Signed into law Dec 2025',t:'a'}],
+   activationTimeline:[{l:'In force from enactment',t:'a'},{l:'Cross-functional team: 180 days to establish',t:'w'}],
+   src2url:'https://www.wilmerhale.com/en/insights/client-alerts/20251219-what-the-ndaa-means-for-ai-and-cybersecurity',src2label:'WilmerHale',
+   src3url:'https://www.apolloresearch.ai/governance/ndaa-ai-security-defense-intelligence/',src3label:'Apollo Research',states:['DC']},
+
+  {id:10,region:'federal',regionLabel:'Federal',jurisdiction:'USA · FY2025 NDAA',name:'National Defense Authorization Act FY2025',billId:'P.L. 118-159 · AI Provisions',status:'force',statusLabel:'In Force',
+   src1url:'https://www.congress.gov/bill/118th-congress/senate-bill/4638',src1label:'congress.gov',
+   relevance:['Directed the CDAO Governing Council to identify AI models posing national security risks — requiring provenance documentation analogous to model card content','Mandated a "human usability" initiative linking documentation quality to practical deployability','Laid groundwork for FY2026 NDAA\'s stronger documentation requirements'],
+   specific:['Modified CDAO Governing Council responsibilities to include AI model national security risk identification and documentation','Required AI educational programmes for DOD personnel covering AI characteristics — implying model-level documentation for training purposes','Budgeting guidelines requiring data documentation for AI model training components'],
+   implications:['Established the institutional infrastructure (CDAO Governing Council) now driving the DOD AI documentation framework','Human usability mandate implicitly requires that AI system capabilities be adequately described — a model card function','Created precedent for defence-sector AI documentation extended significantly by FY2026 NDAA'],
+   passageTimeline:[{l:'Passed Dec 2024',t:'a'},{l:'Signed Dec 2024',t:'a'}],
+   activationTimeline:[{l:'In force from enactment',t:'a'}],
+   src2url:'https://www.klgates.com/Key-Provisions-on-Artificial-Intelligence-in-Fiscal-Year-2025-NDAA-1-2-2025',src2label:'K&L Gates',
+   src3url:null,src3label:null,states:['DC']},
+
+  {id:11,region:'state',regionLabel:'State',jurisdiction:'California, USA',name:'AI Training Data Transparency Act',billId:'AB 2013 · Sep 2024',status:'force',statusLabel:'In Force',
+   src1url:'https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240AB2013',src1label:'CA Leginfo',
+   relevance:['US state instrument most directly analogous to the training data section of a model card','Mandates training data provenance disclosure for AI systems publicly available in California','De facto national standard given California\'s market size — any developer with California users must comply','Most explicit US state training data transparency requirement currently in force'],
+   specific:['Sources of training data and type of data (text, images, audio, etc.)','Dates of data collection and whether data was collected with consent','Whether synthetic data was used in training','Applies to AI systems trained on personal information and publicly available in California'],
+   implications:['De facto national standard: California\'s market size means compliance is required for virtually all major AI developers','Significantly raises the floor for what "adequate" model documentation means for consumer-facing AI','Sets precedent for future state and federal training data legislation — already referenced in subsequent bills'],
+   passageTimeline:[{l:'Signed Sep 28, 2024',t:'a'}],
+   activationTimeline:[{l:'In force Jan 1, 2025',t:'a'}],
+   src2url:'https://www.bakerbotts.com/thought-leadership/publications/2026/january/us-ai-law-update',src2label:'Baker Botts',
+   src3url:'https://www.promptfoo.dev/blog/ai-regulation-2025/',src3label:'Promptfoo',states:['CA']},
+
+  {id:12,region:'state',regionLabel:'State',jurisdiction:'California, USA',name:'Transparency in Frontier AI Act',billId:'SB 53 · Sep 2025',status:'force',statusLabel:'In Force',
+   src1url:'https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB53',src1label:'CA Leginfo',
+   relevance:['First US state statute specifically designed to address catastrophic risk from frontier AI','Requires frontier developers to publish comprehensive safety frameworks — a statutory safety-section model card obligation','Elevated whistleblower protections signal that safety documentation is a legally material artefact','Threshold (10²⁶ FLOPs) aligns with EU AI Act systemic-risk definition — creating a convergent global standard'],
+   specific:['Publication of safety frameworks detailing prevention of critical harms (mass casualty events, critical infrastructure cyberattacks)','Reporting of critical safety incidents to CalOSHA within specified timeframes','Kill-switch capability documentation for frontier models','Enhanced obligations for large frontier developers with annual revenue exceeding $500M'],
+   implications:['Penalties up to $1M per violation','Together with NY RAISE Act and EU AI Act, signals convergence on a global frontier model documentation standard','Whistleblower protections imply that safety documentation failures carry legal risk, not just regulatory risk'],
+   passageTimeline:[{l:'Signed Sep 29, 2025',t:'a'}],
+   activationTimeline:[{l:'In force Sep 2025 (immediate)',t:'a'},{l:'$1M per violation penalty',t:'w'}],
+   src2url:'https://creati.ai/ai-news/2026-02-19/27-ai-laws-enacted-us-states-2023-2025/',src2label:'State AI Laws',
+   src3url:'https://www.gtlaw.com/en/insights/2025/12/2026-outlook-artificial-intelligence',src3label:'Greenberg Traurig',states:['CA']},
+
+  {id:13,region:'state',regionLabel:'State',jurisdiction:'California, USA',name:'California AI Transparency Act',billId:'SB 942 · Sep 2024',status:'force',statusLabel:'Passed / Pending Activation',
+   src1url:'https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB942',src1label:'CA Leginfo',
+   relevance:['Requires AI services with over 1M monthly users to implement content watermarking and detection — applying transparency principles to AI outputs','Bridges model-level documentation with content-level provenance tracking','Creates model identification infrastructure requirements: each deployed model must be identifiable','Aligns with EU watermarking requirements under the AI Act'],
+   specific:['Visible watermarks on AI-generated content identifying it as AI-generated','Latent metadata disclosures identifying the source model and provider','Content detection tools enabling users to verify whether content is AI-generated','Applies to any publicly accessible AI service with 1M+ monthly users in California'],
+   implications:['Penalties of $5,000 per violation per day for non-compliance','Applies to every major AI platform accessible to California residents','Creates downstream demand for model-level identification records — a model card infrastructure requirement'],
+   passageTimeline:[{l:'Signed Sep 2024',t:'a'},{l:'Delayed from Jan 2026 to Aug 2026',t:'w'}],
+   activationTimeline:[{l:'Effective Aug 2, 2026',t:'w'},{l:'$5,000/violation/day',t:'w'}],
+   src2url:'https://www.cimplifi.com/resources/the-updated-state-of-ai-regulations-for-2025/',src2label:'Cimplifi',
+   src3url:null,src3label:null,states:['CA']},
+
+  {id:14,region:'state',regionLabel:'State',jurisdiction:'Colorado, USA',name:'Colorado AI Act',billId:'SB 24-205 · 2024',status:'force',statusLabel:'In Force (Delayed)',
+   src1url:'https://leg.colorado.gov/bills/sb24-205',src1label:'CO Legislature',
+   relevance:['First US state comprehensive AI statute covering high-risk AI across employment, housing, credit, education, and healthcare','Requires impact assessments documenting algorithmic discrimination risk — closest US state-level fairness proof requirement','Only state AI regulation explicitly named in Trump\'s Dec 2025 Executive Order on federal preemption','Mandates model-card-level documentation for any consequential decision-making AI system'],
+   specific:['Developers must document known or reasonably foreseeable risks of algorithmic discrimination in high-risk AI systems','Deployers must conduct and maintain impact assessments specifically evaluating discriminatory harm potential','Consumer disclosures must describe AI involvement in consequential decisions — requires per-model documentation','Record-keeping requirements for impact assessments create an audit trail obligation'],
+   implications:['Penalties up to $20,000 per violation; no private right of action','Under active federal preemption challenge — named in Trump EO Dec 2025','If it survives legal challenge, becomes the US template for comprehensive state AI documentation'],
+   passageTimeline:[{l:'Signed May 2024',t:'a'},{l:'Delayed by SB 25B-004 (Aug 28, 2025)',t:'w'}],
+   activationTimeline:[{l:'Effective Jun 30, 2026',t:'w'},{l:'Under federal preemption challenge',t:'w'}],
+   src2url:'https://www.kslaw.com/news-and-insights/new-state-ai-laws-are-effective-on-january-1-2026-but-a-new-executive-order-signals-disruption',src2label:'King & Spalding',
+   src3url:'https://www.seyfarth.com/news-insights/artificial-intelligence-legal-roundup-colorado-postpones-implementation-of-ai-law-as-california-finalizes-new-employment-discrimination-regulations-and-illinois-disclosure-law-set-to-take-effect.html',src3label:'Seyfarth',states:['CO']},
+
+  {id:15,region:'state',regionLabel:'State',jurisdiction:'New York, USA',name:'RAISE Act',billId:'Responsible AI Safety and Education Act · Dec 2025',status:'force',statusLabel:'Enacted',
+   src1url:'https://iapp.org/resources/article/us-state-ai-governance-legislation-tracker',src1label:'IAPP Tracker',
+   relevance:['New York\'s frontier AI governance law mandating publication of safety policies and risk-mitigation frameworks for frontier developers','Most financially consequential state AI law — creates strong economic incentives for rigorous documentation','Together with California SB 53 and EU AI Act, signals convergence on a global frontier model documentation standard'],
+   specific:['Requires frontier AI developers to publish comprehensive safety policies with sufficient detail for regulatory review','Risk-mitigation frameworks must demonstrate that high-risk capabilities have been assessed and addressed','Prohibits deployment of certain model types without documented safety evaluations','To be amended per agreement with Governor, consistent with companion bills A9449 and S8828'],
+   implications:['First-offense penalties up to $10M; repeat violations up to $30M','Applies to any developer accessing New York markets','Final amended form may differ from enacted text — monitor companion bill progress'],
+   passageTimeline:[{l:'Enacted Dec 2025',t:'a'},{l:'Amendments ongoing (A9449 / S8828)',t:'w'}],
+   activationTimeline:[{l:'Effective Jan 1, 2027',t:'w'}],
+   src2url:'https://creati.ai/ai-news/2026-02-19/27-ai-laws-enacted-us-states-2023-2025/',src2label:'State AI Laws',
+   src3url:'https://www.gtlaw.com/en/insights/2025/12/2026-outlook-artificial-intelligence',src3label:'Greenberg Traurig',states:['NY']},
+
+  {id:16,region:'local',regionLabel:'Local',jurisdiction:'New York City, USA',name:'Local Law 144',billId:'NYC Automated Employment Decision Tools · 2021 (enforcement 2023)',status:'force',statusLabel:'In Force',
+   src1url:'https://legistar.council.nyc.gov/LegislationDetail.aspx?ID=4344524&GUID=B051915D-A9AC-451E-81F8-6357C79C1D00',src1label:'NYC Legistar',
+   relevance:['US jurisdiction closest to mandating a fairness proof via model documentation — requires bias audits with public disclosure','Most direct regulatory analogue to the fairness evaluation section of a model card in US law','Creates a mandatory third-party audit and public disclosure regime for employment AI','Actively enforced; non-compliance carries civil penalties and private right of action'],
+   specific:['Independent bias audits of automated employment decision tools (AEDTs) required before use','Audit results must include selection rates disaggregated by race/ethnicity and sex — a mandatory fairness proof','Public disclosure of audit results required on employer website','Notice to job candidates that AEDT is used, including the data and selection criteria employed'],
+   implications:['Applies to any employer using AI for hiring or promotion decisions affecting NYC residents','Created the first mandatory bias audit industry in the US for employment AI','Established the template for what fairness documentation in employment AI must include'],
+   passageTimeline:[{l:'Passed 2021',t:'a'},{l:'Enforcement delayed to Jul 5, 2023',t:'w'}],
+   activationTimeline:[{l:'In force Jul 5, 2023',t:'a'}],
+   src2url:'https://www.bakerbotts.com/thought-leadership/publications/2026/january/us-ai-law-update',src2label:'Baker Botts',
+   src3url:null,src3label:null,states:['NY']},
+
+  {id:17,region:'state',regionLabel:'State',jurisdiction:'Illinois, USA',name:'Illinois Human Rights Act Amendment',billId:'HB 3773 / Public Act 103-0804 · 2024',status:'force',statusLabel:'In Force',
+   src1url:'https://www.ilga.gov/legislation/BillStatus.asp?DocNum=3773&GAID=17&DocTypeID=HB&SessionID=112&GA=103',src1label:'ILGA',
+   relevance:['Makes discriminatory AI employment decisions a civil rights violation — creating litigation leverage based on bias documentation','Implies employers must maintain model-level bias documentation to defend against discrimination claims','Private right of action creates plaintiff litigation risk for inadequately documented AI employment tools','ZIP code proxy prohibition implies need for training data documentation'],
+   specific:['Employers must provide notice to applicants and employees when using AI for employment decisions','Prohibits use of ZIP codes as proxies for protected characteristics — requires training data documentation','Prohibits AI that subjects employees or applicants to unlawful discrimination','Extended recordkeeping requirements for automated-decision system data create audit trail obligations'],
+   implications:['Private right of action available — creates plaintiff litigation risk for companies without model documentation','Absence of bias documentation becomes legally material in discrimination claims','Combined with Chicago\'s AI governance rules, creates a layered Illinois compliance regime'],
+   passageTimeline:[{l:'Signed Aug 9, 2024',t:'a'}],
+   activationTimeline:[{l:'In force Jan 1, 2026',t:'a'}],
+   src2url:'https://www.seyfarth.com/news-insights/artificial-intelligence-legal-roundup-colorado-postpones-implementation-of-ai-law-as-california-finalizes-new-employment-discrimination-regulations-and-illinois-disclosure-law-set-to-take-effect.html',src2label:'Seyfarth',
+   src3url:null,src3label:null,states:['IL']},
+
+  {id:18,region:'state',regionLabel:'State',jurisdiction:'Texas, USA',name:'Texas Responsible AI Governance Act',billId:'TRAIGA / HB 149 · Jun 2025',status:'force',statusLabel:'In Force',
+   src1url:'https://capitol.texas.gov/BillLookup/History.aspx?LegSess=89R&Bill=HB149',src1label:'TX Capitol',
+   relevance:['Makes compliance with the NIST AI RMF an affirmative defence — and the AI RMF explicitly endorses model cards','Indirectly mandates model card-level documentation by creating a litigation shield for NIST-compliant AI','Largest state after California to pass comprehensive AI governance — second largest economy in the US','Creates market-based incentive for AI developers to produce model cards as risk management documentation'],
+   specific:['Prohibits AI designed for: self-harm encouragement, unlawful discrimination, constitutional rights infringement, CSAM generation','Affirmative defence available for compliance with the NIST AI Risk Management Framework (which endorses model cards in Map and Measure functions)','Implies that NIST-compliant documentation — including model cards — shields developers from TRAIGA liability'],
+   implications:['Penalties from $10,000 (curable violations) to $200,000 (uncurable) plus $40,000/day for continuing violations','By using NIST AI RMF as affirmative defence, TRAIGA effectively makes model cards a litigation shield in Texas','Companies operating in Texas have strong economic incentive to produce NIST-compliant model documentation'],
+   passageTimeline:[{l:'Signed Jun 22, 2025',t:'a'}],
+   activationTimeline:[{l:'In force Jan 1, 2026',t:'a'}],
+   src2url:'https://www.bakerbotts.com/thought-leadership/publications/2026/january/us-ai-law-update',src2label:'Baker Botts',
+   src3url:null,src3label:null,states:['TX']},
+
+  {id:19,region:'state',regionLabel:'State',jurisdiction:'Utah, USA',name:'Utah Artificial Intelligence Policy Act',billId:'SB 149 (2024) + SB 226 (2025)',status:'force',statusLabel:'In Force',
+   src1url:'https://le.utah.gov/~2024/bills/static/SB0149.html',src1label:'UT Legislature',
+   relevance:['Earliest enacted comprehensive state AI governance law in the US — established the template for professional-context AI disclosure','Disclosure requirements for licensed professionals using generative AI implicitly require model-level capability documentation','Creates downstream pressure on AI providers to produce model card-equivalent documentation for B2B customers','Adopted by several other states as a model'],
+   specific:['Conspicuous disclosures required when licensed professionals interact with consumers using generative AI','Stricter mandatory disclosures for "high-risk" interactions — requiring professionals to know and disclose AI system capabilities and limitations','SB 226 (2025) expanded and clarified requirements, extending scope'],
+   implications:['First state AI law in force — established the professional disclosure template adopted by multiple states','Implicitly requires that practitioners have access to accurate model documentation to fulfil disclosure obligations','Creates B2B documentation pressure: AI providers must supply customers with sufficient model-level information'],
+   passageTimeline:[{l:'SB 149 signed Mar 2024',t:'a'},{l:'SB 226 signed May 7, 2025',t:'a'}],
+   activationTimeline:[{l:'SB 149: May 1, 2024',t:'a'},{l:'SB 226: May 7, 2025',t:'a'}],
+   src2url:'https://iapp.org/resources/article/us-state-ai-governance-legislation-tracker',src2label:'IAPP Tracker',
+   src3url:null,src3label:null,states:['UT']},
+
+  {id:20,region:'international',regionLabel:'International',jurisdiction:'Canada',name:'Artificial Intelligence and Data Act',billId:'AIDA / Bill C-27 · 2022–2025',status:'red',statusLabel:'Lapsed',
+   src1url:'https://www.parl.ca/DocumentViewer/en/44-1/bill/C-27/first-reading',src1label:'Parliament of Canada',
+   relevance:['Canada\'s most ambitious AI governance attempt — would have created a comprehensive federal model card framework for high-impact AI','Impact assessments, bias mitigation documentation, and system registration provisions analogous to a statutory model card regime','Though lapsed, its provisions significantly influenced Canadian federal AI policy and voluntary guidance'],
+   specific:['Would have required impact assessments for high-impact AI documenting bias and discrimination risks','Registration of high-impact AI systems in a federal registry — effectively a national model card database','Documentation of mitigation measures for identified risks proportionate to harm potential','Prohibition on reckless AI deployments without prior documentation of potential harms'],
+   implications:['Parliament was prorogued Jan 2025, killing the bill; would need reintroduction in a new session','Federal government\'s voluntary AI guidelines and procurement standards continue to incorporate model documentation requirements','Future AIDA successor legislation expected — companies should monitor Canadian parliamentary activity'],
+   passageTimeline:[{l:'Introduced Jun 2022',t:''},{l:'Parliament prorogued Jan 2025',t:'w'},{l:'Bill lapsed in committee',t:'w'}],
+   activationTimeline:[{l:'Never activated',t:'w'}],
+   src2url:'https://www.cimplifi.com/resources/the-updated-state-of-ai-regulations-for-2025/',src2label:'Cimplifi',
+   src3url:null,src3label:null,states:[]},
+
+  {id:21,region:'international',regionLabel:'International',jurisdiction:'China',name:'Interim Measures for Generative AI Services',billId:'CAC Regulation · August 2023',status:'force',statusLabel:'In Force',
+   src1url:'https://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm',src1label:'CAC (Chinese)',
+   relevance:['China\'s foundational generative AI regulation — requires algorithm registration and security assessments before public deployment','Algorithm filing is a regulatory analogue to submitting a model card to a government authority','As of Nov 2025, 611 generative AI services and 306 apps completed registration — a government-held model documentation database','Apps must publicly disclose which registered model they use, including the government filing number'],
+   specific:['Algorithm filing with Cyberspace Administration of China (CAC) required before public deployment','Security assessment for services with "public opinion attributes or social mobilization capacity"','Content lawfulness and training data registration documentation required','Apps must disclose which filed model underpins the service — a provenance disclosure requirement'],
+   implications:['Creates a government-administered model registration system — a national model card archive','Model information disclosed to regulators is not necessarily public — differs from Western self-disclosure frameworks','Sets precedent for government pre-deployment review of AI documentation distinct from voluntary disclosure models'],
+   passageTimeline:[{l:'Issued Jul 2023',t:'a'}],
+   activationTimeline:[{l:'In force Aug 15, 2023',t:'a'}],
+   src2url:'https://www.cimplifi.com/resources/the-updated-state-of-ai-regulations-for-2025/',src2label:'Cimplifi',
+   src3url:'https://www.promptfoo.dev/blog/ai-regulation-2025/',src3label:'Promptfoo',states:[]},
+
+  {id:22,region:'international',regionLabel:'International',jurisdiction:'China',name:'Measures for Labeling AI-Generated Content',billId:'GB 45438-2025 · CAC Mandatory National Standard',status:'force',statusLabel:'In Force',
+   src1url:'https://www.cac.gov.cn/2025-03/14/c_1744987560575779.htm',src1label:'CAC',
+   relevance:['Mandatory national standard requiring AI-generated content to carry visible labels and provider metadata','Extends model card provenance requirements to every piece of AI-generated output','Creates model identification infrastructure: each deployed model must be identifiable — implying model-card-level registration','Aligns with EU watermarking requirements under the AI Act'],
+   specific:['Visible labels on AI-generated content identifying it as AI-generated','Metadata identifying the source provider and model — provider identification requirement','Platform verification of labels before distribution prohibited from tampering','Six-month log retention for certain cases where explicit labelling is suppressed at user request'],
+   implications:['Backed by mandatory national standard enforcement — not voluntary','Creates downstream demand for model-level documentation: to label content, developers must maintain model identification records','Operates alongside algorithm registration, creating a layered Chinese AI documentation regime'],
+   passageTimeline:[{l:'Final issued Mar 2025',t:'a'}],
+   activationTimeline:[{l:'In force Sep 1, 2025',t:'a'}],
+   src2url:'https://www.promptfoo.dev/blog/ai-regulation-2025/',src2label:'Promptfoo',
+   src3url:null,src3label:null,states:[]},
+
+  {id:23,region:'international',regionLabel:'International',jurisdiction:'South Korea',name:'AI Basic Act',billId:'Republic of Korea · 2025',status:'force',statusLabel:'In Force',
+   src1url:'https://elaw.klri.re.kr/kor_service/lawView.do?hseq=70369&lang=ENG',src1label:'Korea Law',
+   relevance:['South Korea\'s foundational AI governance statute establishing risk assessment requirements for high-risk AI','Local representative requirement for foreign AI providers implies model documentation must be accessible to Korean authorities','Converges on familiar documentation control families consistent with model card practice','Joins China and Australia as Asia-Pacific jurisdictions requiring AI documentation frameworks'],
+   specific:['Risk assessments for high-risk AI systems documenting potential harms — analogous to limitations and risk sections of a model card','Local representative designation for foreign AI providers — requiring documentation accessible in Korea','Consumer transparency disclosures for AI systems interacting with consumers'],
+   implications:['Foreign AI providers serving South Korea must designate local representatives and maintain accessible documentation','Represents South Korea\'s EU-influenced approach to AI governance','Companies building for Asia-Pacific markets must plan for Korean documentation requirements alongside Chinese registration'],
+   passageTimeline:[{l:'Enacted 2024',t:'a'}],
+   activationTimeline:[{l:'In force Jan 2026',t:'a'}],
+   src2url:'https://www.cimplifi.com/resources/the-updated-state-of-ai-regulations-for-2025/',src2label:'Cimplifi',
+   src3url:null,src3label:null,states:[]},
+
+  {id:24,region:'international',regionLabel:'International',jurisdiction:'Brazil',name:'Brazil AI Bill',billId:'Bill No. 2338/2023 · Senate approved Dec 2024',status:'red',statusLabel:'Pending',
+   src1url:'https://www25.senado.leg.br/web/atividade/materias/-/materia/157233',src1label:'Senado Federal',
+   relevance:['Brazil\'s comprehensive AI governance bill — EU-inspired and risk-based','Would establish documentation, risk assessment, and bias mitigation requirements for high-risk AI','If enacted, would be one of the first binding AI documentation laws in Latin America','Would give Brazil significant regional influence over AI governance across Latin America'],
+   specific:['Classification of AI systems by risk level with documentation obligations proportionate to risk','Impact assessments for high-risk AI documenting potential harms and mitigation measures','Bias mitigation documentation required for high-risk applications','Registration of high-risk systems — functionally a national model card database'],
+   implications:['Senate passed Dec 2024; awaiting further legislative approval','If enacted, Brazil joins EU and several US states as jurisdictions with binding AI documentation obligations','Foreign AI providers serving Brazil would face documentation obligations analogous to EU AI Act requirements'],
+   passageTimeline:[{l:'Senate approved Dec 2024',t:'a'},{l:'Awaiting further legislative approval',t:'w'}],
+   activationTimeline:[{l:'Not yet activated',t:'w'}],
+   src2url:'https://www.cimplifi.com/resources/the-updated-state-of-ai-regulations-for-2025/',src2label:'Cimplifi',
+   src3url:null,src3label:null,states:[]},
+
+  {id:25,region:'voluntary',regionLabel:'Voluntary',jurisdiction:'Australia',name:'Voluntary AI Safety Standard',billId:'Australian Government 10 Guardrails · 2024',status:'force',statusLabel:'In Force',
+   src1url:'https://www.industry.gov.au/publications/voluntary-ai-safety-standard',src1label:'DISR Australia',
+   relevance:['Australia\'s voluntary AI governance framework structured as 10 guardrails explicitly aligned with model card documentation practices','Expected to inform future mandatory legislation — advance signal of binding requirements','Functions as an advance signal of Australian government expectations for responsible AI documentation','Procurement-checklist framing suggests guardrails will be embedded in government procurement — as seen in the US with OMB M-26-04'],
+   specific:['Guardrails 1–3: accountability documentation, transparency disclosures about AI capabilities and limitations, continuous risk documentation','Guardrail 6: AI fairness and non-discrimination documentation — analogous to the fairness section of a model card','Guardrail 9: human oversight documentation requirements'],
+   implications:['Voluntary but strongly signals future mandatory direction — consultation on binding requirements underway','Companies adopting guardrails now will be best positioned for future Australian compliance obligations','The procurement-checklist framing suggests these will flow into government contract requirements'],
+   passageTimeline:[{l:'Published 2024',t:'a'}],
+   activationTimeline:[{l:'Voluntary — effective immediately',t:'a'},{l:'Mandatory version under consultation',t:'w'}],
+   src2url:'https://arti-trends.com/ai-guides/ai-regulation-2025-2026/',src2label:'AI Regulation 2025',
+   src3url:null,src3label:null,states:[]},
+
+  {id:26,region:'voluntary',regionLabel:'Voluntary',jurisdiction:'USA (Federal)',name:'NIST AI Risk Management Framework',billId:'AI RMF 1.0 · January 2023',status:'force',statusLabel:'In Force',
+   src1url:'https://airc.nist.gov/RMF',src1label:'NIST AIRC',
+   relevance:['Foundational US AI governance framework that endorses model cards within its Map and Measure functions','Referenced as compliance safe harbour by Texas TRAIGA and implicitly by OMB M-25-21','Transformed model cards from academic proposals into federally endorsed governance tools','Most cited voluntary AI documentation framework globally'],
+   specific:['Map function: AI systems must be documented for intended use, context, capabilities, and limitations — core model card content','Measure function: model evaluation documentation, bias assessments, and performance metrics — model card performance sections','The RMF Playbook provides specific model card implementation guidance and templates'],
+   implications:['Texas TRAIGA makes RMF compliance a legal safe harbour — effectively creating a documentation incentive','OMB M-25-21 requires federal agencies to adopt it — making it mandatory for federal AI','Referenced in EU GPAI Code of Practice as an aligned framework — recognised internationally'],
+   passageTimeline:[{l:'Published Jan 26, 2023',t:'a'}],
+   activationTimeline:[{l:'Voluntary from publication',t:'a'},{l:'Mandatory for federal agencies via M-25-21',t:'a'}],
+   src2url:'https://www.nist.gov/system/files/documents/2023/01/26/AI%20RMF%201.0.pdf',src2label:'NIST PDF',
+   src3url:'https://nvlpubs.nist.gov/nistpubs/ai/nist.ai.100-1.pdf',src3label:'Full Document',states:['DC']}
+];
+
+// ═══════════════════════════════════════════════════════════
+// MAP DATA
+// ═══════════════════════════════════════════════════════════
+// [state, col, row, type: 'none'|'state'|'fed']
+const MAP_STATES = [
+  ['ME',11,1,'none'],
+  ['AK',1,2,'none'],['WI',6,2,'none'],['VT',10,2,'none'],['NH',11,2,'none'],
+  ['WA',2,3,'none'],['ID',3,3,'none'],['MT',4,3,'none'],['ND',5,3,'none'],['MN',6,3,'none'],
+  ['IL',7,3,'state'],['MI',8,3,'none'],['NY',10,3,'state'],['MA',11,3,'none'],
+  ['OR',2,4,'none'],['NV',3,4,'none'],['WY',4,4,'none'],['SD',5,4,'none'],['IA',6,4,'none'],
+  ['IN',7,4,'none'],['OH',8,4,'none'],['PA',9,4,'none'],['NJ',10,4,'none'],['CT',11,4,'none'],['RI',12,4,'none'],
+  ['CA',2,5,'state'],['UT',3,5,'state'],['CO',4,5,'state'],['NE',5,5,'none'],['MO',6,5,'none'],
+  ['KY',7,5,'none'],['WV',8,5,'none'],['VA',9,5,'none'],['MD',10,5,'none'],['DE',11,5,'none'],
+  ['AZ',3,6,'none'],['NM',4,6,'none'],['KS',5,6,'none'],['AR',6,6,'none'],
+  ['TN',7,6,'none'],['NC',8,6,'none'],['SC',9,6,'none'],['DC',10,6,'fed'],
+  ['HI',1,7,'none'],['OK',4,7,'none'],['LA',5,7,'none'],['MS',6,7,'none'],['AL',7,7,'none'],['GA',8,7,'none'],
+  ['TX',4,8,'state'],['FL',8,8,'none']
+];
+
+const STATE_COUNTS = {IL:1,NY:2,CA:3,UT:1,CO:1,TX:1,DC:8};
+const STATE_ROWS = {
+  CA:[11,12,13], CO:[14], NY:[15,16], IL:[17], TX:[18], UT:[19],
+  DC:[1,2,5,6,7,8,9,10,26]
+};
+const STATE_NAMES = {CA:'California',CO:'Colorado',NY:'New York',IL:'Illinois',TX:'Texas',UT:'Utah',DC:'DC / Federal'};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentRegion = 'all';
+let currentStatus = 'all';
+let currentSearch  = '';
+let bmOnly = false;
+let bookmarks = new Set(JSON.parse(sessionStorage.getItem('bm')||'[]'));
+let sortKeys = []; // [{key,dir}]
+let hiddenCols = new Set();
+let focusedRow = -1;
+let kbVisible = false;
+
+// ═══════════════════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════════════════
+function bl(arr){
+  return '<ul class="bl">'+arr.map(x=>`<li>${x}</li>`).join('')+'</ul>';
+}
+function tls(arr){
+  return arr.map(t=>`<span class="tl ${t.t==='a'?'a':t.t==='w'?'w':''}">${t.l}</span>`).join('');
+}
+function srcLink(url,label,cls=''){
+  if(!url) return '<a class="src empty">— N/A —</a>';
+  return `<a class="src${cls?(' '+cls):''}" href="${url}" target="_blank" rel="noopener">↗ ${label}</a>`;
+}
+
+function renderRows(){
+  const filtered = getFiltered();
+  const sorted   = getSorted(filtered);
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  sorted.forEach((d,i)=>{
+    const bm = bookmarks.has(d.id);
+    const tr = document.createElement('tr');
+    tr.dataset.id = d.id;
+    tr.dataset.idx = i;
+    if(bm) tr.classList.add('bookmarked');
+    tr.innerHTML = `
+      <td class="td-bm"><span class="bm-star${bm?' on':''}" title="Bookmark" onclick="toggleBm(event,${d.id})">★</span></td>
+      <td data-col="c1" class="tc1"><span class="badge">${d.regionLabel}</span><span class="badge-sub">${d.jurisdiction}</span></td>
+      <td data-col="c2" class="tc2"><div class="law-name">${d.name}</div><div class="law-id">${d.billId}</div></td>
+      <td data-col="c3" class="tc3"><span class="status ${d.status==='force'?'s-g':'s-r'}">${d.statusLabel}</span></td>
+      <td data-col="c4" class="tc4">${srcLink(d.src1url,d.src1label)}</td>
+      <td data-col="c5" class="tc5"><div class="trunc">${bl(d.relevance)}</div><div class="more-hint">↓ click to expand</div></td>
+      <td data-col="c6" class="tc6"><div class="trunc">${bl(d.specific)}</div><div class="more-hint">↓ click to expand</div></td>
+      <td data-col="c7" class="tc7"><div class="trunc">${bl(d.implications)}</div><div class="more-hint">↓ click to expand</div></td>
+      <td data-col="c8" class="tc8">${tls(d.passageTimeline)}</td>
+      <td data-col="c9" class="tc9">${tls(d.activationTimeline)}</td>
+      <td data-col="c10" class="tc10">${srcLink(d.src2url,d.src2label)}</td>
+      <td data-col="c11" class="tc11">${srcLink(d.src3url,d.src3label)}</td>
+    `;
+    tr.addEventListener('click', e=>{
+      if(e.target.classList.contains('bm-star')) return;
+      if(e.target.tagName==='A') return;
+      tr.classList.toggle('expanded');
+      focusedRow = i;
+      highlightFocused();
+    });
+    tbody.appendChild(tr);
+  });
+  document.getElementById('rowCount').textContent = `${sorted.length} of ${DATA.length} rows`;
+  updateBmCount();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTER & SORT
+// ═══════════════════════════════════════════════════════════
+function getFiltered(){
+  return DATA.filter(d=>{
+    if(currentRegion!=='all' && d.region!==currentRegion) return false;
+    if(currentStatus!=='all' && d.status!==currentStatus) return false;
+    if(bmOnly && !bookmarks.has(d.id)) return false;
+    if(currentSearch){
+      const q = currentSearch.toLowerCase();
+      const hay = [d.name,d.billId,d.regionLabel,d.jurisdiction,d.statusLabel,
+                   ...d.relevance,...d.specific,...d.implications].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function getSorted(arr){
+  if(!sortKeys.length) return arr;
+  return [...arr].sort((a,b)=>{
+    for(const {key,dir} of sortKeys){
+      let va = getSortVal(a,key), vb = getSortVal(b,key);
+      if(va<vb) return dir==='asc'?-1:1;
+      if(va>vb) return dir==='asc'?1:-1;
+    }
+    return 0;
+  });
+}
+function getSortVal(d,key){
+  if(key==='region') return d.regionLabel;
+  if(key==='name')   return d.name;
+  if(key==='status') return d.statusLabel;
+  if(key==='passage') return d.passageTimeline[0]?.l||'';
+  if(key==='activation') return d.activationTimeline[0]?.l||'';
+  return '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SORT INTERACTION
+// ═══════════════════════════════════════════════════════════
+function doSort(key, e){
+  if(e.shiftKey){
+    const ex = sortKeys.find(k=>k.key===key);
+    if(ex) ex.dir = ex.dir==='asc'?'desc':'asc';
+    else if(sortKeys.length<2) sortKeys.push({key,dir:'asc'});
+  } else {
+    const ex = sortKeys.find(k=>k.key===key);
+    if(sortKeys.length===1 && ex) ex.dir = ex.dir==='asc'?'desc':'asc';
+    else sortKeys = [{key,dir:'asc'}];
+  }
+  updateSortHeaders();
+  renderRows();
+  syncURL();
+}
+function updateSortHeaders(){
+  document.querySelectorAll('th[onclick]').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc','sort2-asc','sort2-desc');
+  });
+  sortKeys.forEach(({key,dir},i)=>{
+    const map = {region:'c1',name:'c2',status:'c3',passage:'c8',activation:'c9'};
+    const th = document.querySelector(`th[data-col="${map[key]}"]`);
+    if(!th) return;
+    if(i===0) th.classList.add(dir==='asc'?'sort-asc':'sort-desc');
+    else th.classList.add(dir==='asc'?'sort2-asc':'sort2-desc');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTER INTERACTIONS
+// ═══════════════════════════════════════════════════════════
+function setRegion(btn){
+  currentRegion = btn.dataset.region;
+  document.querySelectorAll('[data-region]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRows();
+  syncURL();
+}
+function setStatus(btn){
+  currentStatus = btn.dataset.status;
+  document.querySelectorAll('[data-status]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRows();
+  syncURL();
+}
+function doSearch(){
+  currentSearch = document.getElementById('searchInput').value;
+  renderRows();
+  syncURL();
+}
+
+// ═══════════════════════════════════════════════════════════
+// URL SYNC
+// ═══════════════════════════════════════════════════════════
+function syncURL(){
+  const p = new URLSearchParams();
+  if(currentRegion!=='all') p.set('region',currentRegion);
+  if(currentStatus!=='all') p.set('status',currentStatus);
+  if(currentSearch) p.set('q',currentSearch);
+  if(sortKeys.length) p.set('sort',sortKeys.map(k=>k.key+'-'+k.dir).join(','));
+  const str = p.toString();
+  history.replaceState(null,'',str?('?'+str):window.location.pathname);
+}
+function readURL(){
+  const p = new URLSearchParams(window.location.search);
+  if(p.has('region')){
+    currentRegion = p.get('region');
+    document.querySelector(`[data-region="${currentRegion}"]`)?.classList.add('on');
+    document.querySelector('[data-region="all"]')?.classList.remove('on');
+  }
+  if(p.has('status')){
+    currentStatus = p.get('status');
+    document.querySelector(`[data-status="${currentStatus}"]`)?.classList.add('on');
+    document.querySelector('[data-status="all"]')?.classList.remove('on');
+  }
+  if(p.has('q')){
+    currentSearch = p.get('q');
+    document.getElementById('searchInput').value = currentSearch;
+  }
+  if(p.has('sort')){
+    sortKeys = p.get('sort').split(',').map(s=>{
+      const [key,dir] = s.split('-');
+      return {key,dir};
+    });
+    updateSortHeaders();
+  }
+  if(p.has('view')) setView(p.get('view'));
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOOKMARKS
+// ═══════════════════════════════════════════════════════════
+function toggleBm(e, id){
+  e.stopPropagation();
+  if(bookmarks.has(id)) bookmarks.delete(id);
+  else bookmarks.add(id);
+  sessionStorage.setItem('bm', JSON.stringify([...bookmarks]));
+  renderRows();
+}
+function toggleBmFilter(){
+  bmOnly = !bmOnly;
+  document.getElementById('bmBtn').classList.toggle('on', bmOnly);
+  renderRows();
+}
+function updateBmCount(){
+  const el = document.getElementById('bmCount');
+  if(bookmarks.size>0){el.style.display='inline';el.textContent=bookmarks.size;}
+  else {el.style.display='none';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// COLUMN TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleCol(sw){
+  sw.classList.toggle('on');
+  const col = sw.dataset.col;
+  if(sw.classList.contains('on')) hiddenCols.delete(col);
+  else hiddenCols.add(col);
+  document.getElementById('mainTable').dataset.hide = [...hiddenCols].join(' ');
+}
+function toggleColPanel(e){
+  e.stopPropagation();
+  document.getElementById('colPanel').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#colPanel')&&!e.target.closest('.act-btn[onclick*="ColPanel"]')){
+    document.getElementById('colPanel').classList.remove('open');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// CSV EXPORT
+// ═══════════════════════════════════════════════════════════
+function exportCSV(){
+  const filtered = getSorted(getFiltered());
+  const headers = ['Region','Jurisdiction','Law/Bill Name','Bill ID','Status','Source 1 URL','Relevance','Specific References','Implications','Passage Timeline','Activation Timeline','Source 2 URL','Source 3 URL'];
+  const esc = v => '"'+String(v||'').replace(/"/g,'""')+'"';
+  const rows = [headers.map(esc).join(',')];
+  filtered.forEach(d=>{
+    rows.push([
+      d.regionLabel, d.jurisdiction, d.name, d.billId, d.statusLabel,
+      d.src1url||'',
+      d.relevance.join(' | '), d.specific.join(' | '), d.implications.join(' | '),
+      d.passageTimeline.map(t=>t.l).join(' | '),
+      d.activationTimeline.map(t=>t.l).join(' | '),
+      d.src2url||'', d.src3url||''
+    ].map(esc).join(','));
+  });
+  const blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'model_cards_legislation_CMU80736.csv';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function toggleKbHint(){
+  kbVisible = !kbVisible;
+  document.getElementById('kbHint').classList.toggle('show', kbVisible);
+}
+function highlightFocused(){
+  document.querySelectorAll('#tableBody tr').forEach((tr,i)=>{
+    tr.classList.toggle('focused', i===focusedRow);
+  });
+  const el = document.querySelectorAll('#tableBody tr')[focusedRow];
+  if(el) el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('searchInput')===document.activeElement) return;
+  const popOpen = document.getElementById('popOverlay').classList.contains('open');
+  if(e.key==='Escape'){
+    if(popOpen){ closePopup(); return; }
+    document.querySelectorAll('#tableBody tr.expanded').forEach(tr=>tr.classList.remove('expanded'));
+    return;
+  }
+  if(popOpen) return;
+  const rows = document.querySelectorAll('#tableBody tr');
+  if(!rows.length) return;
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    focusedRow = Math.min(focusedRow+1, rows.length-1);
+    highlightFocused();
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    focusedRow = Math.max(focusedRow-1, 0);
+    highlightFocused();
+  } else if(e.key==='Enter'){
+    if(focusedRow>=0&&focusedRow<rows.length) rows[focusedRow].classList.toggle('expanded');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// VIEW TOGGLE
+// ═══════════════════════════════════════════════════════════
+function setView(view){
+  const isMap = view==='map';
+  document.getElementById('tableView').classList.toggle('hidden', isMap);
+  document.getElementById('mapView').classList.toggle('hidden', !isMap);
+  document.getElementById('tabTable').classList.toggle('active', !isMap);
+  document.getElementById('tabMap').classList.toggle('active', isMap);
+  const p = new URLSearchParams(window.location.search);
+  p.set('view',view); history.replaceState(null,'','?'+p.toString());
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAP: BUILD CARTOGRAM
+// ═══════════════════════════════════════════════════════════
+function buildCarto(){
+  const grid = document.getElementById('cartoGrid');
+  MAP_STATES.forEach(([code, col, row, type])=>{
+    const div = document.createElement('div');
+    div.style.gridColumn = col;
+    div.style.gridRow = row;
+    const count = STATE_COUNTS[code]||0;
+    if(type==='state'){
+      div.className = 'sq sq-state';
+      div.title = `${STATE_NAMES[code]||code} — ${count} instrument${count!==1?'s':''}`;
+      div.innerHTML = `${code}<span class="sq-cnt">${count}</span>`;
+      div.onclick = ()=>openStatePopup(code);
+    } else if(type==='fed'){
+      div.className = 'sq sq-fed';
+      div.title = `DC / Federal — ${count}+ instruments`;
+      div.innerHTML = `${code}<span class="sq-cnt">${count}+</span>`;
+      div.onclick = ()=>openStatePopup(code);
+    } else {
+      div.className = 'sq sq-none';
+      div.textContent = code;
+    }
+    grid.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAP POPUP
+// ═══════════════════════════════════════════════════════════
+function openStatePopup(code){
+  const ids   = STATE_ROWS[code]||[];
+  const rows  = DATA.filter(d=>ids.includes(d.id));
+  const name  = STATE_NAMES[code]||code;
+  const isFed = code==='DC';
+  document.getElementById('popTag').textContent  = isFed?'Federal Legislation · United States':`State Legislation · United States`;
+  document.getElementById('popName').textContent = name;
+  document.getElementById('popSub').textContent  = `${rows.length} instrument${rows.length!==1?'s':''} tracked`;
+  // Build mini table
+  const tbody_rows = rows.map(d=>`
+    <tr>
+      <td><div class="pop-law">${d.name}</div><div class="pop-id">${d.billId}</div></td>
+      <td><span class="status ${d.status==='force'?'s-g':'s-r'}">${d.statusLabel}</span></td>
+      <td>${srcLink(d.src1url,d.src1label)}</td>
+      <td>${bl(d.relevance)}</td>
+      <td>${bl(d.specific)}</td>
+      <td>${bl(d.implications)}</td>
+      <td>${tls(d.passageTimeline)}</td>
+      <td>${tls(d.activationTimeline)}</td>
+      <td>${srcLink(d.src2url,d.src2label)}${srcLink(d.src3url,d.src3label)}</td>
+    </tr>`).join('');
+  document.getElementById('popBody').innerHTML = `
+    <table class="pop-tbl">
+      <thead><tr>
+        <th style="width:180px">Law / Bill Name</th>
+        <th style="width:95px">Status</th>
+        <th style="width:72px">Source 1</th>
+        <th style="width:195px">Relevance</th>
+        <th style="width:185px">Specific References</th>
+        <th style="width:175px">Implications</th>
+        <th style="width:115px">Passage</th>
+        <th style="width:125px">Activation</th>
+        <th style="width:78px">Sources</th>
+      </tr></thead>
+      <tbody>${tbody_rows}</tbody>
+    </table>`;
+  document.getElementById('popOverlay').classList.add('open');
+}
+function closePopup(){
+  document.getElementById('popOverlay').classList.remove('open');
+}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('popOverlay')) closePopup();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+readURL();
+renderRows();
+buildCarto();
+</script>
+</body>
+</html>
